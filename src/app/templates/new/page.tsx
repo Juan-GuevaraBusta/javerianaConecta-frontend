@@ -66,7 +66,8 @@ export default function NewTemplatePage() {
           console.log('Subiendo PDF para plantilla:', template.id);
           await templatesService.uploadPreviewPdf(template.id, pdfFile);
           console.log('PDF subido exitosamente');
-        } catch (pdfError: unknown) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (pdfError: any) {
           console.error('Error al subir PDF:', pdfError);
           let errorMsg = 'Error desconocido';
           if (pdfError && typeof pdfError === 'object' && 'response' in pdfError) {
@@ -81,7 +82,8 @@ export default function NewTemplatePage() {
       }
 
       router.push(`/templates/${template.id}`);
-    } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error('Error completo:', err);
       let errorMessage = 'Error al crear plantilla';
       
