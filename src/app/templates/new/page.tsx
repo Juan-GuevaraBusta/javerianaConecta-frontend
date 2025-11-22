@@ -154,7 +154,8 @@ export default function NewTemplatePage() {
       if (pdfFile) {
         try {
           await templatesService.uploadPreviewPdf(template.id, pdfFile);
-        } catch (pdfError: unknown) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (pdfError: any) {
           let errorMsg = 'Error desconocido';
           if (pdfError && typeof pdfError === 'object' && 'response' in pdfError) {
             const axiosError = pdfError as { response?: { data?: { message?: string } }; message?: string };
