@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
 :root {
+  /* Paleta de colores Javeriana Conecta */
+  --color-light-blue: #8ECAE6;
+  --color-medium-blue: #219EBC;
+  --color-dark-blue: #023047;
+  --color-yellow-orange: #FFB703;
+  --color-orange: #FB8500;
+  
+  /* Colores de fondo y texto */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #023047;
+  --foreground-light: #6b7280;
+  
+  /* Colores de superficie (tipo LinkedIn) */
+  --surface: #ffffff;
+  --surface-hover: #f9fafb;
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-light-blue: var(--color-light-blue);
+  --color-medium-blue: var(--color-medium-blue);
+  --color-dark-blue: var(--color-dark-blue);
+  --color-yellow-orange: var(--color-yellow-orange);
+  --color-orange: var(--color-orange);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Utilidades personalizadas */
+.text-primary {
+  color: var(--color-medium-blue);
+}
+
+.bg-primary {
+  background-color: var(--color-medium-blue);
+}
+
+.bg-primary-dark {
+  background-color: var(--color-dark-blue);
+}
+
+.border-primary {
+  border-color: var(--color-medium-blue);
+}
+
+.hover\:bg-primary-light:hover {
+  background-color: var(--color-light-blue);
 }
