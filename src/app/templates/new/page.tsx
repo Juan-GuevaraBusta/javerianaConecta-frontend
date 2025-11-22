@@ -165,11 +165,15 @@ export default function NewTemplatePage() {
       let errorMessage = 'Error al actualizar plantilla';
       
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { message?: string } }; message?: string };
+        const axiosError = err as { response?: { data?: { message?: string; data?: { message?: string } } }; message?: string };
         errorMessage = axiosError.response?.data?.message || 
-                          err.response?.data?.data?.message ||
-                          err.message || 
-                          'Error al actualizar plantilla';
+                      axiosError.response?.data?.data?.message ||
+                      axiosError.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
