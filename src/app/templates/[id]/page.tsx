@@ -44,12 +44,20 @@ export default function TemplateDetailPage() {
       const data = await templatesService.getTemplateById(templateId);
       console.log('Plantilla cargada:', data);
       setTemplate(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al cargar plantilla:', err);
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.data?.message ||
-                          err.message || 
-                          'Error al cargar la plantilla';
+      let errorMessage = 'Error al cargar la plantilla';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; data?: { message?: string } } }; message?: string };
+        errorMessage = axiosError.response?.data?.message || 
+                      axiosError.response?.data?.data?.message ||
+                      axiosError.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);

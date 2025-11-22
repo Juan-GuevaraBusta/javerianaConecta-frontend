@@ -42,7 +42,7 @@ export interface LatexTemplate {
   latexContent: string;
   style: string;
   requiredFields: string[];
-  templateConfig?: any;
+  templateConfig?: Record<string, unknown>;
   isActive: boolean;
   isFeatured: boolean;
   version: string;
@@ -60,7 +60,7 @@ export interface CreateTemplateDto {
   latexContent: string;
   style?: string;
   requiredFields: string[];
-  templateConfig?: any;
+  templateConfig?: Record<string, unknown>;
   isFeatured?: boolean;
   version?: string;
 }
@@ -70,13 +70,13 @@ export interface GeneratedResume {
   title: string;
   userId: number;
   templateId: number;
-  userData: any;
+  userData: Record<string, unknown>;
   generatedLatex?: string;
   pdfPath?: string;
   s3Url?: string;
   s3Key?: string;
   generationStatus: 'generating' | 'completed' | 'failed' | 'pending_review';
-  aiSuggestions?: any;
+  aiSuggestions?: Record<string, unknown>;
   notes?: string;
   isFavorite: boolean;
   version: string;
@@ -87,7 +87,7 @@ export interface GeneratedResume {
 export interface CreateResumeDto {
   title: string;
   templateId: number;
-  userData: any;
+  userData: Record<string, unknown>;
   notes?: string;
   isFavorite?: boolean;
 }
@@ -99,7 +99,7 @@ export interface GenerateWithFreeTextDto {
   customTitle?: string;
   additionalContext?: string;
   baseResumeId?: number;
-  aiConfig?: any;
+  aiConfig?: Record<string, unknown>;
 }
 
 export interface ApiResponse<T> {

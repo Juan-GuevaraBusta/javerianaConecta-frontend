@@ -29,13 +29,20 @@ export default function NewResumePage() {
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
 
+  interface ResumeFormData {
+    customTitle?: string;
+    userFreeText?: string;
+    additionalContext?: string;
+    [key: string]: string | undefined;
+  }
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     reset,
-  } = useForm<any>();
+  } = useForm<ResumeFormData>();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -92,7 +99,7 @@ export default function NewResumePage() {
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ResumeFormData) => {
     if (!selectedTemplateId || !selectedTemplate) {
       setError('Debes seleccionar una plantilla');
       return;
@@ -108,7 +115,7 @@ export default function NewResumePage() {
       setIsLoading(true);
 
       // Construir datos estructurados desde los campos del formulario
-      const structuredData: any = {};
+      const structuredData: Record<string, string> = {};
       const requiredFields = selectedTemplate.requiredFields || [];
       
       // Mapear campos del formulario a los campos requeridos
@@ -156,12 +163,20 @@ export default function NewResumePage() {
 
       const resume = await resumesService.generateWithFreeText(resumeData);
       router.push(`/resumes/${resume.id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al generar CV:', err);
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.data?.message ||
-                          err.message || 
-                          'Error al generar CV';
+      let errorMessage = 'Error al generar CV';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; data?: { message?: string } } }; message?: string };
+        errorMessage = axiosError.response?.data?.message || 
+                      axiosError.response?.data?.data?.message ||
+                      axiosError.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);

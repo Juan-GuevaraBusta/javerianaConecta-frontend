@@ -35,7 +35,7 @@ export default function NewTemplatePage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateTemplateDto & { requiredFieldsString: string }) => {
     try {
       setError(null);
       setIsLoading(true);
@@ -65,20 +65,34 @@ export default function NewTemplatePage() {
           console.log('Subiendo PDF para plantilla:', template.id);
           await templatesService.uploadPreviewPdf(template.id, pdfFile);
           console.log('PDF subido exitosamente');
-        } catch (pdfError: any) {
+        } catch (pdfError: unknown) {
           console.error('Error al subir PDF:', pdfError);
-          setError(`Plantilla creada pero error al subir PDF: ${pdfError.response?.data?.message || pdfError.message || 'Error desconocido'}`);
+          let errorMsg = 'Error desconocido';
+          if (pdfError && typeof pdfError === 'object' && 'response' in pdfError) {
+            const axiosError = pdfError as { response?: { data?: { message?: string } }; message?: string };
+            errorMsg = axiosError.response?.data?.message || axiosError.message || errorMsg;
+          } else if (pdfError instanceof Error) {
+            errorMsg = pdfError.message || errorMsg;
+          }
+          setError(`Plantilla creada pero error al subir PDF: ${errorMsg}`);
           // Continuar de todas formas, la plantilla ya está creada
         }
       }
 
       router.push(`/templates/${template.id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error completo:', err);
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.data?.message ||
-                          err.message || 
-                          'Error al crear plantilla';
+      let errorMessage = 'Error al crear plantilla';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; data?: { message?: string } } }; message?: string };
+        errorMessage = axiosError.response?.data?.message || 
+                      axiosError.response?.data?.data?.message ||
+                      axiosError.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
       
       // Si el error es porque ya existe una plantilla con ese código de carrera
       if (errorMessage.includes('Ya existe una plantilla para la carrera')) {
@@ -134,14 +148,25 @@ export default function NewTemplatePage() {
       if (pdfFile) {
         try {
           await templatesService.uploadPreviewPdf(template.id, pdfFile);
-        } catch (pdfError: any) {
-          setError(`Plantilla actualizada pero error al subir PDF: ${pdfError.response?.data?.message || pdfError.message || 'Error desconocido'}`);
+        } catch (pdfError: unknown) {
+          let errorMsg = 'Error desconocido';
+          if (pdfError && typeof pdfError === 'object' && 'response' in pdfError) {
+            const axiosError = pdfError as { response?: { data?: { message?: string } }; message?: string };
+            errorMsg = axiosError.response?.data?.message || axiosError.message || errorMsg;
+          } else if (pdfError instanceof Error) {
+            errorMsg = pdfError.message || errorMsg;
+          }
+          setError(`Plantilla actualizada pero error al subir PDF: ${errorMsg}`);
         }
       }
 
       router.push(`/templates/${template.id}`);
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 
+    } catch (err: unknown) {
+      let errorMessage = 'Error al actualizar plantilla';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string } }; message?: string };
+        errorMessage = axiosError.response?.data?.message || 
                           err.response?.data?.data?.message ||
                           err.message || 
                           'Error al actualizar plantilla';
