@@ -29,12 +29,11 @@ export default function NewResumePage() {
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
 
-  interface ResumeFormData {
+  type ResumeFormData = {
     customTitle?: string;
     userFreeText?: string;
     additionalContext?: string;
-    [key: string]: string | undefined;
-  }
+  } & Record<string, string | undefined>;
 
   const {
     register,
