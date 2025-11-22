@@ -69,7 +69,7 @@ export const resumesService = {
   /**
    * Generar CV con IA
    */
-  async generateWithAI(data: any): Promise<GeneratedResume> {
+  async generateWithAI(data: GenerateWithFreeTextDto): Promise<GeneratedResume> {
     const response = await apiClient.post<ApiResponse<GeneratedResume>>(
       API_ENDPOINTS.resumes.generateWithAI,
       data

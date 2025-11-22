@@ -39,12 +39,20 @@ export const LoginForm: React.FC = () => {
       // Esperar un momento para que el estado se actualice
       await new Promise(resolve => setTimeout(resolve, 100));
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error en login:', err);
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.data?.message ||
-                          err.message || 
-                          'Error al iniciar sesión. Verifica tus credenciales.';
+      let errorMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; data?: { message?: string } } }; message?: string };
+        errorMessage = axiosError.response?.data?.message || 
+                      axiosError.response?.data?.data?.message ||
+                      axiosError.message || 
+                      errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);

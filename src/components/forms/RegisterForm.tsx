@@ -41,8 +41,17 @@ export const RegisterForm: React.FC = () => {
       setIsLoading(true);
       await registerUser(data);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al registrarse');
+    } catch (err: unknown) {
+      let errorMessage = 'Error al registrarse';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

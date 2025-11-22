@@ -35,13 +35,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await authService.getProfile();
       setUser(userData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al cargar usuario:', error);
       // Solo eliminar token si es un error 401 (no autenticado)
       // No eliminar por otros errores (red, servidor, etc.)
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        removeToken();
-        setUser(null);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
+          removeToken();
+          setUser(null);
+        }
       }
     } finally {
       setLoading(false);
