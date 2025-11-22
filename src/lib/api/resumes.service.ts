@@ -69,7 +69,8 @@ export const resumesService = {
   /**
    * Generar CV con IA
    */
-  async generateWithAI(data: GenerateWithFreeTextDto): Promise<GeneratedResume> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async generateWithAI(data: any): Promise<GeneratedResume> {
     const response = await apiClient.post<ApiResponse<GeneratedResume>>(
       API_ENDPOINTS.resumes.generateWithAI,
       data

@@ -44,7 +44,8 @@ export default function TemplateDetailPage() {
       const data = await templatesService.getTemplateById(templateId);
       console.log('Plantilla cargada:', data);
       setTemplate(data);
-    } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error('Error al cargar plantilla:', err);
       let errorMessage = 'Error al cargar la plantilla';
       

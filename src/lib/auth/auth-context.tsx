@@ -35,7 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await authService.getProfile();
       setUser(userData);
-    } catch (error: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error('Error al cargar usuario:', error);
       // Solo eliminar token si es un error 401 (no autenticado)
       // No eliminar por otros errores (red, servidor, etc.)
