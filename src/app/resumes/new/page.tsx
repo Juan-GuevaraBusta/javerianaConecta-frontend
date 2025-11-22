@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { Card } from '../../../components/ui/Card';
@@ -14,7 +14,7 @@ import { templatesService } from '../../../lib/api/templates.service';
 import { LatexTemplate, GenerateWithFreeTextDto } from '../../../lib/types';
 import { useForm } from 'react-hook-form';
 
-export default function NewResumePage() {
+function NewResumePageContent() {
   const { isAuthenticated, loading: authLoading, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -348,4 +348,17 @@ export default function NewResumePage() {
   );
 }
 
+export default function NewResumePage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loading />
+        </div>
+      </DashboardLayout>
+    }>
+      <NewResumePageContent />
+    </Suspense>
+  );
+}
 
