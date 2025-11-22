@@ -33,7 +33,8 @@ export default function NewResumePage() {
     customTitle?: string;
     userFreeText?: string;
     additionalContext?: string;
-  } & Record<string, string | undefined>;
+    [key: string]: any;
+  };
 
   const {
     register,
@@ -76,7 +77,7 @@ export default function NewResumePage() {
           setSelectedTemplate(template);
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar plantillas:', error);
     } finally {
       setLoadingTemplates(false);
@@ -121,7 +122,7 @@ export default function NewResumePage() {
       // Mapear campos del formulario a los campos requeridos
       requiredFields.forEach((field: string) => {
         const fieldKey = field.toLowerCase().replace(/\s+/g, '_');
-        const value = data[fieldKey as keyof ResumeFormData];
+        const value = (data as Record<string, unknown>)[fieldKey];
         if (value && typeof value === 'string' && value.trim() !== '') {
           structuredData[field] = value.trim();
         }
