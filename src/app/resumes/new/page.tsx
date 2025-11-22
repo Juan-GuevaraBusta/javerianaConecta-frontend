@@ -40,7 +40,6 @@ export default function NewResumePage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm<ResumeFormData>();
 
@@ -54,6 +53,7 @@ export default function NewResumePage() {
     if (isAuthenticated) {
       loadTemplates();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -62,6 +62,7 @@ export default function NewResumePage() {
     } else {
       setSelectedTemplate(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplateId, templates]);
 
   const loadTemplates = async () => {
@@ -91,7 +92,7 @@ export default function NewResumePage() {
       const template = await templatesService.getTemplateById(selectedTemplateId);
       setSelectedTemplate(template);
       reset(); // Limpiar el formulario cuando cambia la plantilla
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar plantilla:', error);
       setError('Error al cargar la plantilla seleccionada');
     } finally {
@@ -121,9 +122,9 @@ export default function NewResumePage() {
       // Mapear campos del formulario a los campos requeridos
       requiredFields.forEach((field: string) => {
         const fieldKey = field.toLowerCase().replace(/\s+/g, '_');
-        const value = data[fieldKey];
-        if (value && value.toString().trim() !== '') {
-          structuredData[field] = value.toString().trim();
+        const value = data[fieldKey as keyof ResumeFormData];
+        if (value && typeof value === 'string' && value.trim() !== '') {
+          structuredData[field] = value.trim();
         }
       });
 
