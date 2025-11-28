@@ -4,9 +4,10 @@ import { getToken, removeToken, refreshAccessToken } from '../auth/token-manager
 
 /**
  * Cliente HTTP base con interceptores
+ * Usa URLs relativas para que Next.js API Route actúe como proxy
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.baseURL,
+  baseURL: API_CONFIG.baseURL, // '/api' - URL relativa para usar el proxy
   timeout: API_CONFIG.timeout,
   headers: API_CONFIG.headers,
 });
@@ -14,6 +15,13 @@ const apiClient: AxiosInstance = axios.create({
 // Interceptor para agregar token JWT a las peticiones
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Asegurar que la URL sea relativa (no absoluta)
+    if ('url' in config && config.url && typeof config.url === 'string' && config.url.startsWith('http')) {
+      // Si por alguna razón viene una URL absoluta, convertirla a relativa
+      const url = new URL(config.url);
+      config.url = url.pathname + url.search;
+    }
+    
     const token = getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;

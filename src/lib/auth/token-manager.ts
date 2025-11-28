@@ -48,6 +48,7 @@ export const isTokenExpired = (token: string): boolean => {
 
 /**
  * Refrescar access token
+ * Usa /api para que Next.js API Route actúe como proxy
  */
 export const refreshAccessToken = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken();
@@ -56,7 +57,8 @@ export const refreshAccessToken = async (): Promise<string | null> => {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+    // Usar URL relativa para que el proxy de Next.js maneje la petición
+    const response = await fetch('/api/auth/refresh', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
