@@ -43,14 +43,8 @@ export async function DELETE(
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
+  // Sin restricciones CORS
+  return new NextResponse(null, { status: 200 });
 }
 
 async function proxyRequest(
@@ -102,19 +96,12 @@ async function proxyRequest(
     
     const data = await response.text();
     
-    // Headers de respuesta SIN restricciones de seguridad
-    const responseHeaders: HeadersInit = {
-      'Content-Type': response.headers.get('Content-Type') || 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Max-Age': '86400',
-    };
-    
+    // Sin headers de CORS ni restricciones de seguridad
     return new NextResponse(data, {
       status: response.status,
-      headers: responseHeaders,
+      headers: {
+        'Content-Type': response.headers.get('Content-Type') || 'application/json',
+      },
     });
   } catch (error) {
     console.error('[Proxy Error]', error);
@@ -126,11 +113,6 @@ async function proxyRequest(
       },
       { 
         status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
       }
     );
   }
