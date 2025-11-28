@@ -4,28 +4,63 @@ import { getToken, removeToken, refreshAccessToken } from '../auth/token-manager
 
 /**
  * Cliente HTTP base con interceptores
- * Usa URLs relativas para que Next.js API Route actúe como proxy
+ * FORZADO a usar URLs relativas para que Next.js API Route actúe como proxy
+ * Esto evita completamente el error de Mixed Content
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_CONFIG.baseURL, // '/api' - URL relativa para usar el proxy
+  baseURL: '/api', // FORZADO: siempre usar URL relativa
   timeout: API_CONFIG.timeout,
   headers: API_CONFIG.headers,
 });
 
-// Interceptor para agregar token JWT a las peticiones
+// Interceptor CRÍTICO: Forzar URLs relativas y eliminar cualquier URL absoluta
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Asegurar que la URL sea relativa (no absoluta)
-    if ('url' in config && config.url && typeof config.url === 'string' && config.url.startsWith('http')) {
-      // Si por alguna razón viene una URL absoluta, convertirla a relativa
-      const url = new URL(config.url);
-      config.url = url.pathname + url.search;
+    // FORZAR que baseURL sea siempre relativa
+    if (config.baseURL && typeof config.baseURL === 'string' && config.baseURL.startsWith('http')) {
+      config.baseURL = '/api';
+    }
+    
+    // FORZAR que la URL sea siempre relativa
+    if ('url' in config && config.url) {
+      const url = config.url as string;
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        // Convertir URL absoluta a relativa
+        try {
+          const urlObj = new URL(url);
+          config.url = urlObj.pathname + urlObj.search;
+          // Asegurar que baseURL sea relativa
+          config.baseURL = '/api';
+        } catch {
+          // Si falla, simplemente usar '/api' + path
+          config.url = '/api' + url.replace(/^https?:\/\/[^/]+/, '');
+          config.baseURL = '';
+        }
+      } else if (!url.startsWith('/')) {
+        // Si no empieza con /, asegurar que baseURL esté configurado
+        config.baseURL = config.baseURL || '/api';
+      }
+    }
+    
+    // Asegurar que baseURL siempre sea relativa
+    if (!config.baseURL || (typeof config.baseURL === 'string' && config.baseURL.startsWith('http'))) {
+      config.baseURL = '/api';
     }
     
     const token = getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log para debugging (solo en desarrollo)
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[API Client] Request:', {
+        baseURL: config.baseURL,
+        url: 'url' in config ? config.url : 'N/A',
+        fullURL: config.baseURL + ('url' in config && config.url ? config.url : ''),
+      });
+    }
+    
     return config;
   },
   (error: AxiosError) => {

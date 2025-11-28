@@ -60,11 +60,19 @@ async function proxyRequest(
 ) {
   try {
     const path = pathSegments.join('/');
-    // Remover '/api' del path si está presente (ya que BACKEND_URL ya lo incluye)
-    const cleanPath = path.startsWith('api/') ? path.substring(4) : path;
-    const url = `${BACKEND_URL}/${cleanPath}${request.nextUrl.search}`;
+    // BACKEND_URL ya incluye '/api', así que solo necesitamos el path sin 'api'
+    let cleanPath = path;
+    if (cleanPath.startsWith('api/')) {
+      cleanPath = cleanPath.substring(4);
+    }
     
-    console.log(`[Proxy] ${method} ${url}`);
+    // Construir URL completa del backend
+    const backendBase = BACKEND_URL.endsWith('/api') 
+      ? BACKEND_URL.substring(0, BACKEND_URL.length - 4) 
+      : BACKEND_URL.replace(/\/api$/, '');
+    const url = `${backendBase}/api/${cleanPath}${request.nextUrl.search}`;
+    
+    console.log(`[Proxy] ${method} ${request.nextUrl.pathname} -> ${url}`);
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -77,7 +85,7 @@ async function proxyRequest(
     }
     
     const contentType = request.headers.get('Content-Type');
-    if (contentType) {
+    if (contentType && contentType !== 'application/json') {
       headers['Content-Type'] = contentType;
     }
     
@@ -85,24 +93,23 @@ async function proxyRequest(
       ? await request.text() 
       : undefined;
     
+    // Hacer la petición al backend HTTP desde el servidor
     const response = await fetch(url, {
       method,
       headers,
       body,
-      // Deshabilitar todas las verificaciones de seguridad para permitir HTTP
-      // @ts-expect-error - fetch options
-      rejectUnauthorized: false,
     });
     
     const data = await response.text();
     
-    // Copiar headers de respuesta del backend
+    // Headers de respuesta SIN restricciones de seguridad
     const responseHeaders: HeadersInit = {
       'Content-Type': response.headers.get('Content-Type') || 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
       'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400',
     };
     
     return new NextResponse(data, {
@@ -114,7 +121,8 @@ async function proxyRequest(
     return NextResponse.json(
       { 
         error: 'Error al conectar con el backend',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        path: pathSegments.join('/'),
       },
       { 
         status: 500,

@@ -1,15 +1,22 @@
 /**
  * Configuración base de la API
+ * IMPORTANTE: Siempre usar URLs relativas para que Next.js API Route actúe como proxy
+ * Esto evita completamente el error de Mixed Content (HTTPS -> HTTP)
  */
 export const API_CONFIG = {
-  // Usar proxy de Next.js para evitar Mixed Content (HTTPS -> HTTP)
-  // El proxy está configurado en next.config.ts para redirigir /api/* al backend
+  // FORZADO: Siempre usar URL relativa '/api' - NUNCA usar URLs absolutas
+  // El proxy está en /app/api/[...path]/route.ts
   baseURL: '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 };
+
+// Verificar que no se esté usando NEXT_PUBLIC_API_URL en el cliente
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) {
+  console.warn('[API Config] ADVERTENCIA: NEXT_PUBLIC_API_URL está definida pero NO debe usarse en el cliente. Usar siempre URLs relativas.');
+}
 
 export const API_ENDPOINTS = {
   auth: {
