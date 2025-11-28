@@ -2,7 +2,9 @@
  * Configuración base de la API
  */
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  // Usar proxy de Next.js para evitar Mixed Content (HTTPS -> HTTP)
+  // El proxy está configurado en next.config.ts para redirigir /api/* al backend
+  baseURL: '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
